@@ -27,22 +27,36 @@ module.exports = async function inbox() {
     process.exit(1);
   }
 
-  const messages = res.body.messages || [];
+  const all = res.body.messages || [];
+  const requests = all.filter(m => m.type === 'friend_request');
+  const skills   = all.filter(m => m.type === 'skill' || !m.type);
 
-  if (messages.length === 0) {
+  if (all.length === 0) {
     console.log('Inbox empty. Share your username so others can send you skills!');
     return;
   }
 
-  console.log(`\n  ⚡ Inbox for @${cfg.username} — ${messages.length} skill(s)\n`);
+  console.log(`\n  ⚡ Inbox for @${cfg.username}\n`);
 
-  for (const msg of messages) {
-    console.log(`  ┌─ ⚡ /${msg.skill_name}`);
-    console.log(`  │  from: @${msg.from}  ·  ${timeAgo(msg.sent_at)}`);
-    console.log(`  │  id:   ${msg.id}`);
-    console.log(`  └─ to install: skillshare add ${msg.id}\n`);
+  if (requests.length > 0) {
+    console.log(`  Friend requests (${requests.length})\n`);
+    for (const r of requests) {
+      console.log(`  ┌─ 👤 @${r.from} wants to be friends`);
+      console.log(`  │  ${timeAgo(r.sent_at)}  ·  id: ${r.id}`);
+      console.log(`  ├─ accept:  skillshare friends accept @${r.from} ${r.id}`);
+      console.log(`  └─ decline: skillshare friends decline @${r.from} ${r.id}\n`);
+    }
   }
 
-  console.log(`  Run 'skillshare add <id>' to install a skill.`);
-  console.log(`  Or inside Claude Code: /skills-add <id>\n`);
+  if (skills.length > 0) {
+    console.log(`  Skills (${skills.length})\n`);
+    for (const msg of skills) {
+      console.log(`  ┌─ ⚡ /${msg.skill_name}`);
+      console.log(`  │  from: @${msg.from}  ·  ${timeAgo(msg.sent_at)}`);
+      console.log(`  │  id:   ${msg.id}`);
+      console.log(`  └─ to install: skillshare add ${msg.id}\n`);
+    }
+    console.log(`  Run 'skillshare add <id>' to install a skill.`);
+    console.log(`  Or inside Claude Code: /skills-add <id>\n`);
+  }
 };
