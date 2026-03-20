@@ -16,6 +16,7 @@ const HELP = `
     add <id>          Install a skill from your inbox
     who @user         Look up a user's profile and skill list
     sync              Push your local skill list to the registry
+    app               Launch the menu bar app
     swiftbar          Install the macOS menu bar widget (requires SwiftBar)
     swiftbar uninstall  Remove the menu bar widget
     config get [key]  Show configuration
@@ -56,6 +57,10 @@ async function main() {
 
     case 'sync':
       await require('../src/commands/sync')();
+      break;
+
+    case 'app':
+      require('../src/commands/app')();
       break;
 
     case 'swiftbar':

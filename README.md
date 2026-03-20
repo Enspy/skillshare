@@ -11,12 +11,7 @@ skillshare send @devdan /polish
 
 ```bash
 npm install -g skillshare-cc
-```
-
-Then open the menu bar app:
-
-```bash
-cd electron && npm install && npm start
+skillshare app
 ```
 
 Click `⚡` in your menu bar, choose a username, and you're set up. Your slash commands (`/skills-send`, `/skills-inbox`, etc.) are installed automatically.
