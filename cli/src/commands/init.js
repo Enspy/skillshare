@@ -30,6 +30,8 @@ module.exports = async function init({ reset, username: presetUsername } = {}) {
 
   if (existing && !reset) {
     console.log(`Already initialized as @${existing.username}`);
+    installHook();
+    installCommands();
     console.log(`Run 'skillshare init --reset' to register a new username.`);
     return;
   }

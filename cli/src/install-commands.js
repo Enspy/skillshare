@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const COMMANDS_SRC = path.resolve(__dirname, '../../commands');
+const COMMANDS_SRC = path.resolve(__dirname, '../app/commands');
 const COMMANDS_DEST = path.join(os.homedir(), '.claude', 'commands');
 
 function installCommands() {
