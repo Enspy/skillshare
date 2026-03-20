@@ -49,8 +49,6 @@ function request(method, pathname, body, token) {
 
 module.exports = {
   claim: (username) => request('POST', '/claim', { username }),
-  getUser: (username) => request('GET', `/user/${username}`),
-  updateSkills: (skills, token) => request('POST', '/skills', { skills }, token),
   send: (to, skillName, skillContent, token) =>
     request('POST', '/send', { to, skill_name: skillName, skill_content: skillContent }, token),
   inbox: (token, since) =>

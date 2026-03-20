@@ -64,26 +64,6 @@ export default {
       return json({ username, token: `${username}:${secret}` });
     }
 
-    // GET /user/:username — public profile
-    const userMatch = path.match(/^\/user\/([a-z0-9_]{2,32})$/);
-    if (userMatch && method === 'GET') {
-      const user = await getUser(env, userMatch[1]);
-      if (!user) return err('user not found', 404);
-      return json({ username: user.username, skills: user.skills, registered_at: user.registered_at });
-    }
-
-    // POST /skills
-    if (path === '/skills' && method === 'POST') {
-      const username = await authenticate(request, env);
-      if (!username) return err('unauthorized', 401);
-      const body = await request.json().catch(() => null);
-      if (!Array.isArray(body?.skills)) return err('skills must be an array');
-      const user = await getUser(env, username);
-      user.skills = body.skills.slice(0, 100).map(String);
-      await saveUser(env, user);
-      return json({ ok: true, skills: user.skills });
-    }
-
     // GET /friends
     if (path === '/friends' && method === 'GET') {
       const username = await authenticate(request, env);

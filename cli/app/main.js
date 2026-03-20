@@ -143,19 +143,6 @@ ipcMain.handle('send-skill', async (_, { to, skillName }) => {
   return res.body;
 });
 
-ipcMain.handle('sync-skills', async () => {
-  const cfg = readConfig();
-  let skills = [];
-  try {
-    skills = fs.readdirSync(COMMANDS_DIR)
-      .filter((f) => f.endsWith('.md'))
-      .map((f) => f.replace('.md', ''))
-      .filter((n) => !SYSTEM_COMMANDS.has(n));
-  } catch {}
-  const res = await apiRequest('/skills', cfg.token, 'POST', { skills });
-  return res.body;
-});
-
 ipcMain.handle('resize', (_, height) => {
   if (mb?.window) mb.window.setContentSize(300, Math.min(height + 16, 560));
 });

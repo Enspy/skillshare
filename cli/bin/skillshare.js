@@ -11,18 +11,14 @@ const HELP = `
   Commands:
     init              Claim your username and install Claude Code slash commands
     init --reset      Re-register with a new username
-    send @user /skill Send one of your skills to another user
-    inbox             List skills others have sent you
+    send @user /skill Send one of your skills to a friend
+    inbox             List skills and friend requests waiting for you
     add <id>          Install a skill from your inbox
-    who @user         Look up a user's profile and skill list
-    sync              Push your local skill list to the registry
     friends           List your friends
     friends add @user Send a friend request
     friends accept @user <id>  Accept a friend request
     friends decline @user <id> Decline a friend request
     app               Launch the menu bar app
-    swiftbar          Install the macOS menu bar widget (requires SwiftBar)
-    swiftbar uninstall  Remove the menu bar widget
     config get [key]  Show configuration
     config set k v    Set a config value (e.g. api_url)
 
@@ -30,7 +26,6 @@ const HELP = `
     /skills-init
     /skills-send @user /skillname
     /skills-inbox
-    /skills-who @user
     /skills-add <id>
 `;
 
@@ -55,14 +50,6 @@ async function main() {
       await require('../src/commands/add')(args);
       break;
 
-    case 'who':
-      await require('../src/commands/who')(args);
-      break;
-
-    case 'sync':
-      await require('../src/commands/sync')();
-      break;
-
     case 'friends':
       await require('../src/commands/friends')(args);
       break;
@@ -73,10 +60,6 @@ async function main() {
 
     case 'app':
       require('../src/commands/app')();
-      break;
-
-    case 'swiftbar':
-      await require('../src/commands/swiftbar')(args);
       break;
 
     case 'config':

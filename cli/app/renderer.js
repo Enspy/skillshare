@@ -128,10 +128,6 @@ function renderMain(state) {
         <span class="tile-icon">+</span>
         <span class="tile-label">Add Friend</span>
       </button>
-      <button class="tile" id="sync-tile">
-        <span class="tile-icon">⟳</span>
-        <span class="tile-label">Sync</span>
-      </button>
     </div>
   `;
   autoResize();
@@ -176,15 +172,6 @@ function renderMain(state) {
   // Add Friend tile
   document.getElementById('add-friend-tile').addEventListener('click', () => {
     renderAddFriend(username);
-  });
-
-  // Sync tile
-  document.getElementById('sync-tile').addEventListener('click', async () => {
-    const tile = document.getElementById('sync-tile');
-    tile.querySelector('.tile-label').textContent = 'Syncing…';
-    await window.api.syncSkills();
-    tile.querySelector('.tile-label').textContent = 'Synced ✓';
-    setTimeout(() => { tile.querySelector('.tile-label').textContent = 'Sync'; }, 2000);
   });
 }
 

@@ -8,7 +8,6 @@ contextBridge.exposeInMainWorld('api', {
   installSkill:   (id)     => ipcRenderer.invoke('install-skill', id),
   getLocalSkills: ()       => ipcRenderer.invoke('get-local-skills'),
   sendSkill:      (data)   => ipcRenderer.invoke('send-skill', data),
-  syncSkills:     ()       => ipcRenderer.invoke('sync-skills'),
   resize:         (h)      => ipcRenderer.invoke('resize', h),
   onRefresh:      (cb)     => ipcRenderer.on('refresh', () => cb()),
   acceptFriend:   (data)   => ipcRenderer.invoke('accept-friend', data),
