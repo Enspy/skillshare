@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      background: transparent;
+      padding: 8px;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: default;
+    }
+
+    .container {
+      background: rgba(235, 230, 221, 0.88);
+      border-radius: 18px;
+      padding: 14px;
+      backdrop-filter: blur(60px) saturate(180%);
+      -webkit-backdrop-filter: blur(60px) saturate(180%);
+      box-shadow:
+        0 0 0 0.5px rgba(0, 0, 0, 0.12),
+        0 4px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 0 2px;
+    }
+    .header-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #6e6af0, #9b78ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(110, 106, 240, 0.4);
+    }
+    .header-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      letter-spacing: -0.3px;
+    }
+    .header-sub {
+      font-size: 11px;
+      color: rgba(0,0,0,0.45);
+      margin-top: 1px;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255, 255, 255, 0.62);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .section-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.4);
+      padding: 10px 14px 5px;
+    }
+
+    /* Skill rows (like Wi-Fi / Bluetooth list) */
+    .skill-row {
+      display: flex;
+      align-items: center;
+      padding: 9px 14px;
+      gap: 11px;
+      border-top: 0.5px solid rgba(0,0,0,0.07);
+    }
+    .skill-row:first-of-type { border-top: none; }
+    .skill-row-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #6e6af0, #9b78ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .skill-row-info { flex: 1; min-width: 0; }
+    .skill-row-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1a1a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .skill-row-meta {
+      font-size: 11px;
+      color: rgba(0,0,0,0.4);
+      margin-top: 1px;
+    }
+    .add-btn {
+      background: rgba(0,0,0,0.07);
+      border: none;
+      border-radius: 20px;
+      padding: 4px 11px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #5856d6;
+      cursor: pointer;
+      transition: background 0.12s;
+      flex-shrink: 0;
+      font-family: inherit;
+    }
+    .add-btn:hover { background: rgba(88, 86, 214, 0.14); }
+    .add-btn:active { background: rgba(88, 86, 214, 0.22); }
+    .add-btn.done { color: #34c759; background: rgba(52,199,89,0.1); cursor: default; }
+
+    /* Action tiles (like Stage Manager / Screen Mirroring) */
+    .tiles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 0;
+    }
+    .tile {
+      background: rgba(255, 255, 255, 0.62);
+      border-radius: 14px;
+      padding: 13px 10px 11px;
+      cursor: pointer;
+      transition: background 0.12s, transform 0.1s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      border: none;
+      font-family: inherit;
+    }
+    .tile:hover { background: rgba(255,255,255,0.82); }
+    .tile:active { transform: scale(0.97); }
+    .tile-icon {
+      font-size: 20px;
+      line-height: 1;
+      color: #1a1a1a;
+    }
+    .tile-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #1a1a1a;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* Empty / error state */
+    .empty {
+      padding: 16px 14px;
+      text-align: center;
+    }
+    .empty-text { font-size: 12.5px; color: rgba(0,0,0,0.35); }
+
+    /* Setup / onboarding */
+    .setup-card {
+      background: rgba(255,255,255,0.62);
+      border-radius: 14px;
+      padding: 16px 14px;
+      margin-bottom: 8px;
+    }
+    .setup-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 3px;
+    }
+    .setup-sub {
+      font-size: 11px;
+      color: rgba(0,0,0,0.4);
+      margin-bottom: 11px;
+    }
+    .setup-input {
+      width: 100%;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 9px;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #1a1a1a;
+      outline: none;
+      margin-bottom: 8px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .setup-input:focus {
+      border-color: #5856d6;
+      box-shadow: 0 0 0 3px rgba(88,86,214,0.15);
+    }
+    .primary-btn {
+      width: 100%;
+      background: #5856d6;
+      border: none;
+      border-radius: 9px;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.12s;
+    }
+    .primary-btn:hover { opacity: 0.88; }
+    .primary-btn:disabled { opacity: 0.45; cursor: default; }
+    .error-msg {
+      font-size: 11px;
+      color: #ff3b30;
+      margin-top: 7px;
+      text-align: center;
+    }
+
+    /* Back navigation */
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 12px;
+      color: #5856d6;
+      cursor: pointer;
+      padding: 0 2px;
+      margin-bottom: 10px;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .back-btn:hover { opacity: 0.7; }
+  </style>
+</head>
+<body>
+  <div class="container" id="root"></div>
+  <script src="renderer.js"></script>
+</body>
+</html>
