@@ -44,9 +44,9 @@ skillshare sync                        # publish your skill list
 
 Skills are Claude Code slash commands — markdown files in `~/.claude/commands/`. When you send a skill, the file content is delivered to the recipient's inbox. When they install it, it's written to their `~/.claude/commands/` and available immediately as a slash command.
 
-## Self-hosting the backend
+## Self-hosting (optional)
 
-The backend is a Cloudflare Worker. To run your own:
+The shared backend handles everything — you don't need to run your own. If you want full control over your data, you can deploy your own Cloudflare Worker:
 
 ```bash
 cd backend
