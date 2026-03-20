@@ -1,53 +1,50 @@
 # skillshare-cc
 
-Send and receive Claude Code skills with other users — straight from your terminal.
+Send and receive Claude Code skills with other users.
 
-```
-/skills-send @devdan /polish
+```bash
+skillshare send @devdan /polish
 ⚡ /polish sent to @devdan
 ```
-
-Optionally pairs with a macOS menu bar widget that notifies you when skills arrive and lets you install them in one click.
 
 ## Install
 
 ```bash
 npm install -g skillshare-cc
-skillshare init
 ```
 
-That's it. `init` claims your username and adds five slash commands to Claude Code.
-
-## Usage
-
-Inside Claude Code:
-
-```
-/skills-send @username /skillname   send one of your skills
-/skills-inbox                       see skills people sent you
-/skills-add <id>                    install a skill from your inbox
-/skills-who @username               look up someone's skill list
-```
-
-Or from your terminal directly:
+Then open the menu bar app:
 
 ```bash
-skillshare send @username /skillname
-skillshare inbox
-skillshare sync    # publish your skill list so others can see it
+cd electron && npm install && npm start
 ```
 
-## Menu bar widget (macOS)
+Click `⚡` in your menu bar, choose a username, and you're set up. Your slash commands (`/skills-send`, `/skills-inbox`, etc.) are installed automatically.
 
-Requires [SwiftBar](https://swiftbar.app) (free).
+## Menu bar
+
+The `⚡` icon lives in your menu bar. Click it to:
+
+- See skills waiting in your inbox and install them with one click
+- Send one of your skills to another user
+- Sync your skill list so others can see what you have
+
+## Terminal
+
+You can also do everything from the terminal:
 
 ```bash
-skillshare swiftbar
+skillshare send @username /skillname   # send a skill
+skillshare inbox                       # check what's waiting
+skillshare who @username               # see someone's skill list
+skillshare sync                        # publish your skill list
 ```
 
-Shows `⚡` in your menu bar. Turns yellow with a count when skills are waiting. One-click to install.
+## How it works
 
-## Self-hosting
+Skills are Claude Code slash commands — markdown files in `~/.claude/commands/`. When you send a skill, the file content is delivered to the recipient's inbox. When they install it, it's written to their `~/.claude/commands/` and available immediately as a slash command.
+
+## Self-hosting the backend
 
 The backend is a Cloudflare Worker. To run your own:
 
