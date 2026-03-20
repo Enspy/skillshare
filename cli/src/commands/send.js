@@ -3,6 +3,7 @@ const path = require('path');
 const os = require('os');
 const config = require('../config');
 const api = require('../api');
+const notify = require('../notify');
 
 function findSkillFile(skillName) {
   const name = skillName.replace(/^\//, '');
@@ -58,4 +59,5 @@ module.exports = async function send(args) {
 
   console.log(' done');
   console.log(`⚡ /${skillName} sent to @${to}`);
+  notify('⚡ Skills Exchange', `/${skillName} sent to @${to}`);
 };

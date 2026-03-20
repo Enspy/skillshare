@@ -5,6 +5,7 @@ const os = require('os');
 const config = require('../config');
 const api = require('../api');
 const { installCommands } = require('../install-commands');
+const notify = require('../notify');
 
 function installHook() {
   const settingsFile = path.join(os.homedir(), '.claude', 'settings.json');
@@ -32,6 +33,7 @@ module.exports = async function init({ reset, username: presetUsername } = {}) {
     console.log(`Already initialized as @${existing.username}`);
     installHook();
     installCommands();
+    notify('⚡ Skills Exchange', `You're @${existing.username} — notifications active`);
     console.log(`Run 'skillshare init --reset' to register a new username.`);
     return;
   }
@@ -95,6 +97,7 @@ module.exports = async function init({ reset, username: presetUsername } = {}) {
   installHook();
   console.log(' done\n');
 
+  notify('⚡ Skills Exchange', `You're @${res.body.username} — ready to send and receive skills`);
   console.log(`  ✓ You are @${res.body.username} on Skills Exchange`);
   console.log(`  ✓ Slash commands: ${installed.join(', ')}`);
   console.log(`  ✓ Inbox notifications active in Claude Code\n`);

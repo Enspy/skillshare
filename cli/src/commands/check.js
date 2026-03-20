@@ -8,6 +8,7 @@ const path = require('path');
 const os = require('os');
 const config = require('../config');
 const api = require('../api');
+const notify = require('../notify');
 
 const SEEN_FILE = path.join(os.homedir(), '.claude', 'skills-exchange', '.seen_ids.json');
 
@@ -52,6 +53,5 @@ module.exports = async function check() {
 
   if (parts.length === 0) return;
 
-  // This output is injected as context by the Claude Code hook
-  console.log(`[Skills Exchange] ${parts.join(' · ')} — open the ⚡ widget or run /skills-inbox to respond.`);
+  notify('⚡ Skills Exchange', parts.join(' · '));
 };
