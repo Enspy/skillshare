@@ -3,7 +3,7 @@ const config = require('../config');
 const api = require('../api');
 const { installCommands } = require('../install-commands');
 
-module.exports = async function init({ reset } = {}) {
+module.exports = async function init({ reset, username: presetUsername } = {}) {
   const existing = config.read();
 
   if (existing && !reset) {
@@ -12,19 +12,29 @@ module.exports = async function init({ reset } = {}) {
     return;
   }
 
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
-
-  console.log('\n  ⚡ Claude Code — Skills Exchange\n');
-
   let username = '';
-  while (username.length < 2) {
-    const raw = await ask('  Choose a username (letters, numbers, underscores): @');
-    username = raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
-    if (username.length < 2) console.log('  Username must be at least 2 characters.\n');
-  }
 
-  rl.close();
+  // Non-interactive mode: username passed directly (e.g. from SwiftBar widget)
+  if (presetUsername) {
+    username = presetUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+    if (username.length < 2) {
+      console.error('Username must be at least 2 characters.');
+      process.exit(1);
+    }
+  } else {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
+
+    console.log('\n  ⚡ Claude Code — Skills Exchange\n');
+
+    while (username.length < 2) {
+      const raw = await ask('  Choose a username (letters, numbers, underscores): @');
+      username = raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+      if (username.length < 2) console.log('  Username must be at least 2 characters.\n');
+    }
+
+    rl.close();
+  }
 
   process.stdout.write(`\n  Registering @${username}...`);
 

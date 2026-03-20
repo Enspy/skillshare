@@ -148,9 +148,20 @@ async function main() {
     line('⚡', { sfimage: 'bolt', color: '#888888' });
     sep();
     line('Skills Exchange', { size: 13 });
-    line('Not set up | size=11 color=#888888');
+    line('Send and receive Claude Code skills', { size: 11, color: '#888888' });
     sep();
-    line('Set up now...', { sfimage: 'arrow.right.circle', bash: skillshare, param1: 'init', terminal: true, refresh: true });
+    line('Set up — choose username', {
+      sfimage: 'person.crop.circle.badge.plus',
+      color: '#FFD60A',
+      size: 13,
+      bash: '/usr/bin/osascript',
+      param1: '-e',
+      param2: 'set u to text returned of (display dialog "Choose a username for Skills Exchange:" default answer "" with title "⚡ Skills Exchange")',
+      param3: '-e',
+      param4: `do shell script "${skillshare} init --username=" & quoted form of u`,
+      terminal: false,
+      refresh: true,
+    });
     return;
   }
 

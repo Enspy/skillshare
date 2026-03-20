@@ -31,9 +31,12 @@ const HELP = `
 
 async function main() {
   switch (command) {
-    case 'init':
-      await require('../src/commands/init')({ reset: args.includes('--reset') });
+    case 'init': {
+      const usernameFlag = args.find(a => a.startsWith('--username='));
+      const presetUsername = usernameFlag ? usernameFlag.split('=')[1] : null;
+      await require('../src/commands/init')({ reset: args.includes('--reset'), username: presetUsername });
       break;
+    }
 
     case 'send':
       await require('../src/commands/send')(args);
