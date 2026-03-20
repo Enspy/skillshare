@@ -125,11 +125,27 @@
     .add-btn:hover { background: rgba(88, 86, 214, 0.14); }
     .add-btn:active { background: rgba(88, 86, 214, 0.22); }
     .add-btn.done { color: #34c759; background: rgba(52,199,89,0.1); cursor: default; }
+    .decline-btn {
+      background: rgba(255,59,48,0.09);
+      border: none;
+      border-radius: 20px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #ff3b30;
+      cursor: pointer;
+      flex-shrink: 0;
+      font-family: inherit;
+      transition: background 0.12s;
+      margin-left: 4px;
+    }
+    .decline-btn:hover { background: rgba(255,59,48,0.18); }
+    .decline-btn:disabled { opacity: 0.4; cursor: default; }
 
     /* Action tiles (like Stage Manager / Screen Mirroring) */
     .tiles {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
       margin-bottom: 0;
     }

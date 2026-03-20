@@ -56,4 +56,8 @@ module.exports = {
   inbox: (token, since) =>
     request('GET', `/inbox${since ? `?since=${encodeURIComponent(since)}` : ''}`, null, token),
   deleteMessage: (id, token) => request('DELETE', `/inbox/${id}`, null, token),
+  friends: (token) => request('GET', '/friends', null, token),
+  friendRequest: (to, token) => request('POST', '/friend-request', { to }, token),
+  friendAccept: (requestId, from, token) => request('POST', '/friend-accept', { request_id: requestId, from }, token),
+  friendDecline: (requestId, token) => request('POST', '/friend-decline', { request_id: requestId }, token),
 };

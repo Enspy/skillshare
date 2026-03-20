@@ -1,7 +1,29 @@
 const readline = require('readline');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 const config = require('../config');
 const api = require('../api');
 const { installCommands } = require('../install-commands');
+
+function installHook() {
+  const settingsFile = path.join(os.homedir(), '.claude', 'settings.json');
+  let settings = {};
+  try { settings = JSON.parse(fs.readFileSync(settingsFile, 'utf8')); } catch {}
+
+  const hook = { type: 'command', command: 'skillshare check 2>/dev/null' };
+  settings.hooks = settings.hooks || {};
+  settings.hooks.UserPromptSubmit = settings.hooks.UserPromptSubmit || [];
+
+  // Don't add duplicate
+  const already = settings.hooks.UserPromptSubmit.some(h =>
+    h.hooks?.some(c => c.command?.includes('skillshare check'))
+  );
+  if (!already) {
+    settings.hooks.UserPromptSubmit.push({ hooks: [hook] });
+    fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2));
+  }
+}
 
 module.exports = async function init({ reset, username: presetUsername } = {}) {
   const existing = config.read();
@@ -66,11 +88,14 @@ module.exports = async function init({ reset, username: presetUsername } = {}) {
   console.log(' done');
   process.stdout.write('  Installing Claude Code commands...');
   const installed = installCommands();
+  console.log(' done');
+  process.stdout.write('  Installing inbox hook...');
+  installHook();
   console.log(' done\n');
 
   console.log(`  ✓ You are @${res.body.username} on Skills Exchange`);
-  console.log(`  ✓ Commands installed: ${installed.join(', ')}\n`);
-  console.log('  Try it inside Claude Code:');
-  console.log('    /skills-who @someuser');
-  console.log('    /skills-send @someuser /frontend-design\n');
+  console.log(`  ✓ Slash commands: ${installed.join(', ')}`);
+  console.log(`  ✓ Inbox notifications active in Claude Code\n`);
+  console.log('  Next: add a friend so you can exchange skills:');
+  console.log('    skillshare friends add @username\n');
 };

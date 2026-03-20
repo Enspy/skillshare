@@ -16,6 +16,10 @@ const HELP = `
     add <id>          Install a skill from your inbox
     who @user         Look up a user's profile and skill list
     sync              Push your local skill list to the registry
+    friends           List your friends
+    friends add @user Send a friend request
+    friends accept @user <id>  Accept a friend request
+    friends decline @user <id> Decline a friend request
     app               Launch the menu bar app
     swiftbar          Install the macOS menu bar widget (requires SwiftBar)
     swiftbar uninstall  Remove the menu bar widget
@@ -57,6 +61,14 @@ async function main() {
 
     case 'sync':
       await require('../src/commands/sync')();
+      break;
+
+    case 'friends':
+      await require('../src/commands/friends')(args);
+      break;
+
+    case 'check':
+      await require('../src/commands/check')();
       break;
 
     case 'app':

@@ -62,14 +62,34 @@ ipcMain.handle('get-state', async () => {
   if (!cfg) return { initialized: false };
   try {
     const res = await apiRequest('/inbox', cfg.token);
-    const messages = res.body?.messages || [];
+    const all = res.body?.messages || [];
+    const skills = all.filter((m) => m.type === 'skill' || !m.type);
+    const requests = all.filter((m) => m.type === 'friend_request');
     const seen = readSeen();
-    const newCount = messages.filter((m) => !seen.has(m.id)).length;
-    writeSeen(new Set(messages.map((m) => m.id)));
-    return { initialized: true, username: cfg.username, messages, newCount };
+    const newCount = all.filter((m) => !seen.has(m.id)).length;
+    writeSeen(new Set(all.map((m) => m.id)));
+    return { initialized: true, username: cfg.username, messages: skills, requests, newCount };
   } catch (e) {
-    return { initialized: true, username: cfg.username, messages: [], error: e.message };
+    return { initialized: true, username: cfg.username, messages: [], requests: [], error: e.message };
   }
+});
+
+ipcMain.handle('accept-friend', async (_, { requestId, from }) => {
+  const cfg = readConfig();
+  const res = await apiRequest('/friend-accept', cfg.token, 'POST', { request_id: requestId, from });
+  return res.body;
+});
+
+ipcMain.handle('decline-friend', async (_, requestId) => {
+  const cfg = readConfig();
+  const res = await apiRequest('/friend-decline', cfg.token, 'POST', { request_id: requestId });
+  return res.body;
+});
+
+ipcMain.handle('add-friend', async (_, to) => {
+  const cfg = readConfig();
+  const res = await apiRequest('/friend-request', cfg.token, 'POST', { to });
+  return res.body;
 });
 
 ipcMain.handle('register', async (_, username) => {

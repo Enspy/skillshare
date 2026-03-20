@@ -20,6 +20,10 @@ async function getUser(env, username) {
   return env.USERS.get(`user:${username}`, 'json');
 }
 
+async function saveUser(env, user) {
+  return env.USERS.put(`user:${user.username}`, JSON.stringify(user));
+}
+
 async function authenticate(request, env) {
   const auth = request.headers.get('Authorization') || '';
   if (!auth.startsWith('Bearer ')) return null;
@@ -33,6 +37,10 @@ async function authenticate(request, env) {
   return username;
 }
 
+function areFriends(userA, userB) {
+  return (userA.friends || []).includes(userB.username);
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
@@ -43,106 +51,151 @@ export default {
     const path = url.pathname;
     const method = request.method;
 
-    // POST /claim — register a new username
+    // POST /claim
     if (path === '/claim' && method === 'POST') {
       const body = await request.json().catch(() => null);
       if (!body?.username) return err('username required');
-
       const username = sanitizeUsername(body.username);
       if (username.length < 2) return err('username must be at least 2 characters');
-
       if (await getUser(env, username)) return err('username already taken', 409);
-
       const bytes = crypto.getRandomValues(new Uint8Array(24));
       const secret = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-
-      await env.USERS.put(`user:${username}`, JSON.stringify({
-        username,
-        secret,
-        skills: [],
-        registered_at: new Date().toISOString(),
-      }));
-
+      await saveUser(env, { username, secret, skills: [], friends: [], registered_at: new Date().toISOString() });
       return json({ username, token: `${username}:${secret}` });
     }
 
-    // GET /user/:username — public profile + skill list
+    // GET /user/:username — public profile
     const userMatch = path.match(/^\/user\/([a-z0-9_]{2,32})$/);
     if (userMatch && method === 'GET') {
       const user = await getUser(env, userMatch[1]);
       if (!user) return err('user not found', 404);
-      return json({
-        username: user.username,
-        skills: user.skills,
-        registered_at: user.registered_at,
-      });
+      return json({ username: user.username, skills: user.skills, registered_at: user.registered_at });
     }
 
-    // POST /skills — update your own skill list
+    // POST /skills
     if (path === '/skills' && method === 'POST') {
       const username = await authenticate(request, env);
       if (!username) return err('unauthorized', 401);
-
       const body = await request.json().catch(() => null);
       if (!Array.isArray(body?.skills)) return err('skills must be an array');
-
       const user = await getUser(env, username);
       user.skills = body.skills.slice(0, 100).map(String);
-      await env.USERS.put(`user:${username}`, JSON.stringify(user));
+      await saveUser(env, user);
       return json({ ok: true, skills: user.skills });
     }
 
-    // POST /send — deliver a skill to another user's inbox
+    // GET /friends
+    if (path === '/friends' && method === 'GET') {
+      const username = await authenticate(request, env);
+      if (!username) return err('unauthorized', 401);
+      const user = await getUser(env, username);
+      return json({ friends: user.friends || [] });
+    }
+
+    // POST /friend-request
+    if (path === '/friend-request' && method === 'POST') {
+      const from = await authenticate(request, env);
+      if (!from) return err('unauthorized', 401);
+      const body = await request.json().catch(() => null);
+      if (!body?.to) return err('to required');
+      const to = sanitizeUsername(body.to.replace(/^@/, ''));
+      if (to === from) return err('cannot add yourself');
+      const recipient = await getUser(env, to);
+      if (!recipient) return err(`user @${to} not found`, 404);
+      // Already friends
+      const sender = await getUser(env, from);
+      if (areFriends(sender, recipient)) return json({ ok: true, already_friends: true });
+      // Check for duplicate pending request
+      const existing = await env.INBOX.list({ prefix: `inbox:${to}:` });
+      for (const key of existing.keys) {
+        const msg = await env.INBOX.get(key.name, 'json');
+        if (msg?.type === 'friend_request' && msg?.from === from) {
+          return json({ ok: true, already_sent: true });
+        }
+      }
+      const id = crypto.randomUUID();
+      await env.INBOX.put(
+        `inbox:${to}:${id}`,
+        JSON.stringify({ id, type: 'friend_request', from, sent_at: new Date().toISOString() }),
+        { expirationTtl: 60 * 60 * 24 * 30 },
+      );
+      return json({ ok: true, id });
+    }
+
+    // POST /friend-accept
+    if (path === '/friend-accept' && method === 'POST') {
+      const username = await authenticate(request, env);
+      if (!username) return err('unauthorized', 401);
+      const body = await request.json().catch(() => null);
+      if (!body?.request_id || !body?.from) return err('request_id and from required');
+      // Delete the request from inbox
+      await env.INBOX.delete(`inbox:${username}:${body.request_id}`);
+      // Add each other as friends
+      const me = await getUser(env, username);
+      const them = await getUser(env, body.from);
+      if (!them) return err('user not found', 404);
+      me.friends = [...new Set([...(me.friends || []), body.from])];
+      them.friends = [...new Set([...(them.friends || []), username])];
+      await saveUser(env, me);
+      await saveUser(env, them);
+      return json({ ok: true });
+    }
+
+    // POST /friend-decline
+    if (path === '/friend-decline' && method === 'POST') {
+      const username = await authenticate(request, env);
+      if (!username) return err('unauthorized', 401);
+      const body = await request.json().catch(() => null);
+      if (!body?.request_id) return err('request_id required');
+      await env.INBOX.delete(`inbox:${username}:${body.request_id}`);
+      return json({ ok: true });
+    }
+
+    // POST /send — friends only
     if (path === '/send' && method === 'POST') {
       const from = await authenticate(request, env);
       if (!from) return err('unauthorized', 401);
-
       const body = await request.json().catch(() => null);
       if (!body?.to || !body?.skill_name) return err('to and skill_name required');
-
       const to = sanitizeUsername(body.to.replace(/^@/, ''));
-      if (!(await getUser(env, to))) return err(`user @${to} not found`, 404);
-
+      const recipient = await getUser(env, to);
+      if (!recipient) return err(`user @${to} not found`, 404);
+      // Enforce friendship
+      if (!areFriends(recipient, { username: from })) {
+        return err(`you are not friends with @${to}. Send them a friend request first.`, 403);
+      }
       const id = crypto.randomUUID();
       await env.INBOX.put(
         `inbox:${to}:${id}`,
         JSON.stringify({
           id,
+          type: 'skill',
           from,
           skill_name: String(body.skill_name).replace(/^\//, ''),
           skill_content: String(body.skill_content || '').slice(0, 65536),
           sent_at: new Date().toISOString(),
         }),
-        { expirationTtl: 60 * 60 * 24 * 30 }, // expire after 30 days
+        { expirationTtl: 60 * 60 * 24 * 30 },
       );
-
       return json({ ok: true, id });
     }
 
-    // GET /inbox — your pending inbound skills
+    // GET /inbox
     if (path === '/inbox' && method === 'GET') {
       const username = await authenticate(request, env);
       if (!username) return err('unauthorized', 401);
-
       const since = url.searchParams.get('since');
       const sinceDate = since ? new Date(since) : null;
-
       const list = await env.INBOX.list({ prefix: `inbox:${username}:` });
       const messages = [];
-
       for (const key of list.keys) {
         const msg = await env.INBOX.get(key.name, 'json');
-        if (msg && (!sinceDate || new Date(msg.sent_at) > sinceDate)) {
-          messages.push(msg);
-        }
+        if (msg && (!sinceDate || new Date(msg.sent_at) > sinceDate)) messages.push(msg);
       }
-
-      return json({
-        messages: messages.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at)),
-      });
+      return json({ messages: messages.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at)) });
     }
 
-    // DELETE /inbox/:id — remove a message (after adding the skill)
+    // DELETE /inbox/:id
     const inboxDel = path.match(/^\/inbox\/([a-f0-9-]+)$/);
     if (inboxDel && method === 'DELETE') {
       const username = await authenticate(request, env);

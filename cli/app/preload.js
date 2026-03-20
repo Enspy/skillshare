@@ -11,4 +11,7 @@ contextBridge.exposeInMainWorld('api', {
   syncSkills:     ()       => ipcRenderer.invoke('sync-skills'),
   resize:         (h)      => ipcRenderer.invoke('resize', h),
   onRefresh:      (cb)     => ipcRenderer.on('refresh', () => cb()),
+  acceptFriend:   (data)   => ipcRenderer.invoke('accept-friend', data),
+  declineFriend:  (id)     => ipcRenderer.invoke('decline-friend', id),
+  addFriend:      (to)     => ipcRenderer.invoke('add-friend', to),
 });

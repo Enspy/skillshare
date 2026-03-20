@@ -68,7 +68,24 @@ function renderSetup() {
 }
 
 function renderMain(state) {
-  const { username, messages = [], error } = state;
+  const { username, messages = [], requests = [], error } = state;
+
+  const requestsSection = requests.length === 0 ? '' : `
+    <div class="card">
+      <div class="section-label">Friend requests — ${requests.length}</div>
+      ${requests.map((r) => `
+        <div class="skill-row">
+          <div class="skill-row-icon">👤</div>
+          <div class="skill-row-info">
+            <div class="skill-row-name">@${r.from}</div>
+            <div class="skill-row-meta">wants to be friends · ${timeAgo(r.sent_at)}</div>
+          </div>
+          <button class="add-btn" data-id="${r.id}" data-from="${r.from}" data-action="accept">Accept</button>
+          <button class="decline-btn" data-id="${r.id}" data-action="decline">✕</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
 
   const inboxSection = messages.length === 0 ? `
     <div class="card">
@@ -100,11 +117,16 @@ function renderMain(state) {
         <div class="header-sub">@${username}</div>
       </div>
     </div>
+    ${requestsSection}
     ${inboxSection}
     <div class="tiles">
       <button class="tile" id="send-tile">
         <span class="tile-icon">↑</span>
         <span class="tile-label">Send Skill</span>
+      </button>
+      <button class="tile" id="add-friend-tile">
+        <span class="tile-icon">+</span>
+        <span class="tile-label">Add Friend</span>
       </button>
       <button class="tile" id="sync-tile">
         <span class="tile-icon">⟳</span>
@@ -114,8 +136,24 @@ function renderMain(state) {
   `;
   autoResize();
 
-  // Install buttons
-  root.querySelectorAll('.add-btn').forEach((btn) => {
+  // Accept/decline friend request buttons
+  root.querySelectorAll('[data-action="accept"]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      btn.textContent = '…'; btn.disabled = true;
+      await window.api.acceptFriend({ requestId: btn.dataset.id, from: btn.dataset.from });
+      renderMain(await window.api.getState());
+    });
+  });
+  root.querySelectorAll('[data-action="decline"]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      await window.api.declineFriend(btn.dataset.id);
+      renderMain(await window.api.getState());
+    });
+  });
+
+  // Install skill buttons
+  root.querySelectorAll('.add-btn[data-name]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       btn.textContent = '…';
       btn.disabled = true;
@@ -133,6 +171,11 @@ function renderMain(state) {
   document.getElementById('send-tile').addEventListener('click', async () => {
     const skills = await window.api.getLocalSkills();
     renderSendPicker(skills, username);
+  });
+
+  // Add Friend tile
+  document.getElementById('add-friend-tile').addEventListener('click', () => {
+    renderAddFriend(username);
   });
 
   // Sync tile
@@ -222,6 +265,59 @@ function renderSendTo(skillName, username) {
     } else {
       err.textContent = res.error || 'Failed — is that username registered?';
       btn.disabled = false; btn.textContent = 'Send';
+    }
+  }
+}
+
+function renderAddFriend(username) {
+  root.innerHTML = `
+    <div class="header">
+      <div class="header-icon-wrap">⚡</div>
+      <div>
+        <div class="header-title">Add a Friend</div>
+        <div class="header-sub">@${username}</div>
+      </div>
+    </div>
+    <button class="back-btn" id="back">‹ Back</button>
+    <div class="setup-card">
+      <div class="setup-title">Send a friend request</div>
+      <div class="setup-sub">They'll need to accept before you can exchange skills</div>
+      <input class="setup-input" id="friend-input" placeholder="@username" autocomplete="off" spellcheck="false">
+      <button class="primary-btn" id="friend-btn">Send request</button>
+      <div class="error-msg" id="friend-err"></div>
+    </div>
+  `;
+  autoResize();
+
+  const input = document.getElementById('friend-input');
+  const btn   = document.getElementById('friend-btn');
+  const err   = document.getElementById('friend-err');
+
+  input.focus();
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+  btn.addEventListener('click', submit);
+
+  document.getElementById('back').addEventListener('click', async () => {
+    renderMain(await window.api.getState());
+  });
+
+  async function submit() {
+    const to = input.value.trim().replace(/^@/, '');
+    if (!to) { err.textContent = 'Enter a username.'; return; }
+    btn.disabled = true; btn.textContent = 'Sending…'; err.textContent = '';
+    const res = await window.api.addFriend(to);
+    if (res.already_friends) {
+      err.textContent = `You're already friends with @${to}.`;
+      btn.disabled = false; btn.textContent = 'Send request';
+    } else if (res.already_sent) {
+      err.textContent = `Request already sent to @${to}.`;
+      btn.disabled = false; btn.textContent = 'Send request';
+    } else if (res.ok) {
+      btn.textContent = 'Sent ✓';
+      setTimeout(async () => renderMain(await window.api.getState()), 1200);
+    } else {
+      err.textContent = res.error || 'Failed — is that username registered?';
+      btn.disabled = false; btn.textContent = 'Send request';
     }
   }
 }
