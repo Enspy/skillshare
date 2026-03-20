@@ -3,7 +3,7 @@ const path = require('path');
 const os   = require('os');
 const { execSync } = require('child_process');
 
-const PLUGIN_SRC = path.resolve(__dirname, '../../../swiftbar/skillshare.1m.js');
+const PLUGIN_SRC = path.resolve(__dirname, '../../swiftbar/skillshare.1m.js');
 
 // SwiftBar lets users pick any folder; check common locations
 function findPluginsDir() {
