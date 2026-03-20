@@ -2,7 +2,7 @@ const https = require('https');
 const http = require('http');
 const config = require('./config');
 
-const DEFAULT_API = 'https://skillshare-cc.workers.dev';
+const DEFAULT_API = 'https://skillshare-cc.enspyreinvesting.workers.dev';
 
 function apiUrl() {
   const cfg = config.read();

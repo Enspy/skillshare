@@ -2,15 +2,10 @@ name = "skillshare-cc"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
-# After running `wrangler kv:namespace create USERS` and `wrangler kv:namespace create INBOX`,
-# paste the generated IDs below.
-
 [[kv_namespaces]]
 binding = "USERS"
-id = "REPLACE_WITH_USERS_KV_ID"
-preview_id = "REPLACE_WITH_USERS_KV_PREVIEW_ID"
+id = "7060fa1565d14685b342b01b3a9e8b79"
 
 [[kv_namespaces]]
 binding = "INBOX"
-id = "REPLACE_WITH_INBOX_KV_ID"
-preview_id = "REPLACE_WITH_INBOX_KV_PREVIEW_ID"
+id = "5fbf79fd7ac54323a515a46d123e5dc0"
