@@ -1,21 +1,25 @@
-The user wants to send a Claude Code skill to another user via Skills Exchange.
+The user wants to send one of their Claude Code skills to another user via Skills Exchange.
 
-Run this command, using the arguments the user provided (e.g. "@devdan /polish"):
+Parse the arguments naturally — they might say "@alex /polish", "send polish to alex", "@alex polish", or similar. Extract the recipient username and skill name.
 
-```bash
-skillshare send $ARGUMENTS
-```
-
-Show the output. If it succeeds, confirm that the skill was delivered.
-
-If the skill file is not found locally, explain that the skill must exist in `~/.claude/commands/` before it can be sent. List what skills are available:
+Run:
 
 ```bash
-ls ~/.claude/commands/*.md | xargs -I{} basename {} .md
+skillshare send @<username> /<skillname>
 ```
 
-If `skillshare` is not installed, tell the user to run:
+If you're not sure which skill they mean, first list available skills:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Enspy/skillshare/main/install.sh | bash
+ls ~/.claude/commands/*.md 2>/dev/null | xargs -I{} basename {} .md
 ```
+
+Then pick the closest match to what they said and confirm before sending if it's ambiguous.
+
+If the send fails because you're not friends with the recipient, explain they need to add each other first:
+
+```bash
+skillshare friends add @<username>
+```
+
+If `skillshare` is not installed, tell the user to run `npm install -g skillshare-cc`.
