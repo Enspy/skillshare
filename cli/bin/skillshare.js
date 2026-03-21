@@ -69,9 +69,19 @@ async function main() {
     case '--help':
     case '-h':
     case 'help':
-    case undefined:
       console.log(HELP);
       break;
+
+    case undefined: {
+      const config = require('../src/config');
+      if (!config.read()) {
+        // First run — go straight to setup
+        await require('../src/commands/init')({});
+      } else {
+        console.log(HELP);
+      }
+      break;
+    }
 
     default:
       console.error(`Unknown command: ${command}`);
