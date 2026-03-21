@@ -74,11 +74,15 @@ async function main() {
 
     case undefined: {
       const config = require('../src/config');
-      if (!config.read()) {
-        // First run — go straight to setup
+      const cfg = config.read();
+      if (!cfg) {
         await require('../src/commands/init')({});
       } else {
-        console.log(HELP);
+        console.log(`\n  Skills Exchange — @${cfg.username}\n`);
+        console.log('  skillshare app                      open the menu bar widget');
+        console.log('  skillshare send @user /skill        send a skill to a friend');
+        console.log('  skillshare friends add @user        add a friend');
+        console.log('  skillshare inbox                    check inbox\n');
       }
       break;
     }
