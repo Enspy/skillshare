@@ -186,7 +186,7 @@ app.whenReady().then(() => {
   });
 
   mb.on('ready', () => {
-    mb.tray.setTitle(' ⚡');
+    mb.tray.setTitle(' 🤝');
   });
 
   mb.on('after-show', () => {

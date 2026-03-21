@@ -22,7 +22,7 @@ function renderSetup() {
   root.innerHTML = `
     <div class="header">
       <div class="header-left">
-        <span class="header-icon">⚡</span>
+        <span class="header-icon">🤝</span>
         <span class="header-title">Skills Exchange</span>
       </div>
     </div>
@@ -109,7 +109,7 @@ function renderMain(state) {
   root.innerHTML = `
     <div class="header">
       <div class="header-left">
-        <span class="header-icon">⚡</span>
+        <span class="header-icon">🤝</span>
         <span class="header-title">Skills Exchange</span>
       </div>
       <span class="header-time">@${username}</span>
@@ -190,7 +190,7 @@ function renderSendPicker(skills, username) {
   root.innerHTML = `
     <div class="header">
       <div class="header-left">
-        <span class="header-icon">⚡</span>
+        <span class="header-icon">🤝</span>
         <span class="header-title">Send a Skill</span>
       </div>
       <button class="footer-btn" id="back">‹ Back</button>
@@ -214,7 +214,7 @@ function renderSendTo(skillName, username) {
   root.innerHTML = `
     <div class="header">
       <div class="header-left">
-        <span class="header-icon">⚡</span>
+        <span class="header-icon">🤝</span>
         <span class="header-title">/${skillName}</span>
       </div>
       <button class="footer-btn" id="back">‹ Back</button>
@@ -261,7 +261,7 @@ function renderAddFriend(username) {
   root.innerHTML = `
     <div class="header">
       <div class="header-left">
-        <span class="header-icon">⚡</span>
+        <span class="header-icon">🤝</span>
         <span class="header-title">Add Friend</span>
       </div>
       <button class="footer-btn" id="back">‹ Back</button>
