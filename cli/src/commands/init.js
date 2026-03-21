@@ -2,10 +2,20 @@ const readline = require('readline');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { execSync } = require('child_process');
 const config = require('../config');
 const api = require('../api');
 const { installCommands } = require('../install-commands');
 const notify = require('../notify');
+
+function suggestUsername() {
+  try {
+    const name = execSync('git config --global user.name 2>/dev/null', { stdio: ['pipe','pipe','pipe'] })
+      .toString().trim();
+    if (name) return name.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20);
+  } catch {}
+  return (process.env.USER || process.env.USERNAME || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20);
+}
 
 function installHook() {
   const settingsFile = path.join(os.homedir(), '.claude', 'settings.json');
@@ -50,12 +60,17 @@ module.exports = async function init({ reset, username: presetUsername } = {}) {
   } else {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
+    const suggestion = suggestUsername();
 
-    console.log('\n  ⚡ Claude Code — Skills Exchange\n');
+    console.log('\n  🤝 Claude Code — Skills Exchange\n');
 
     while (username.length < 2) {
-      const raw = await ask('  Choose a username (letters, numbers, underscores): @');
-      username = raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+      const prompt = suggestion
+        ? `  Username [@${suggestion}]: `
+        : `  Choose a username (letters, numbers, underscores): @`;
+      const raw = await ask(prompt);
+      const input = raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+      username = input.length >= 2 ? input : (suggestion.length >= 2 ? suggestion : '');
       if (username.length < 2) console.log('  Username must be at least 2 characters.\n');
     }
 

@@ -148,7 +148,7 @@ ipcMain.handle('send-skill', async (_, { to, skillName }) => {
 });
 
 ipcMain.handle('resize', (_, height) => {
-  if (mb?.window) mb.window.setContentSize(300, Math.min(height + 16, 560));
+  if (mb?.window) mb.window.setContentSize(280, Math.min(height + 16, 560));
 });
 
 // ── App ───────────────────────────────────────────────────────────────────────
@@ -166,18 +166,16 @@ app.whenReady().then(() => {
     icon,
     browserWindow: {
       width: 280,
-      height: 420,
+      height: 50,
       webPreferences: {
         preload: path.join(__dirname, 'preload.js'),
         contextIsolation: true,
         nodeIntegration: false,
       },
-      vibrancy: 'popover',
-      visualEffectState: 'active',
       transparent: true,
       frame: false,
       resizable: false,
-      hasShadow: true,
+      hasShadow: false,
       backgroundColor: '#00000000',
     },
     preloadWindow: true,
@@ -191,5 +189,11 @@ app.whenReady().then(() => {
 
   mb.on('after-show', () => {
     mb.window.webContents.send('refresh');
+    setTimeout(async () => {
+      try {
+        const h = await mb.window.webContents.executeJavaScript('document.getElementById("root").scrollHeight');
+        if (h > 0) mb.window.setContentSize(280, Math.min(h + 16, 560));
+      } catch {}
+    }, 80);
   });
 });

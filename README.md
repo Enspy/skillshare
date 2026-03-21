@@ -3,45 +3,81 @@
 Send and receive Claude Code skills with other users.
 
 ```bash
-skillshare send @devdan /polish
-⚡ /polish sent to @devdan
+npm install -g skillshare-cc
+skillshare init
 ```
 
-## Install
+## What it does
+
+Skills are Claude Code slash commands — markdown files in `~/.claude/commands/`. When you send a skill, the file content is delivered to the recipient's inbox. They install it with one click and it's immediately available as a slash command in Claude Code.
+
+## Setup
 
 ```bash
 npm install -g skillshare-cc
-skillshare app
+skillshare init        # choose a username, installs hooks + slash commands
+skillshare app         # launch the menu bar widget
 ```
 
-Click `⚡` in your menu bar, choose a username, and you're set up. Your slash commands (`/skills-send`, `/skills-inbox`, etc.) are installed automatically.
+A 🤝 icon appears in your menu bar. Click it to manage your inbox and send skills.
 
-## Menu bar
+## Friends
 
-The `⚡` icon lives in your menu bar. Click it to:
+You can only exchange skills with friends. Add someone first:
 
+```bash
+skillshare friends add @username
+```
+
+They'll get an OS notification and can accept with:
+
+```bash
+skillshare friends accept @you
+```
+
+Or accept directly from the menu bar widget.
+
+## Sending skills
+
+```bash
+skillshare send @username /skillname
+```
+
+If you're not friends yet, the skill is queued automatically and delivered the moment they accept your friend request — no extra steps needed.
+
+## Menu bar widget
+
+Click 🤝 to:
+
+- See pending friend requests and accept/decline them
 - See skills waiting in your inbox and install them with one click
-- Send one of your skills to another user
-- Sync your skill list so others can see what you have
+- Send one of your skills to a friend
+- Add new friends
 
-## Terminal
-
-You can also do everything from the terminal:
+## Terminal commands
 
 ```bash
 skillshare send @username /skillname   # send a skill
-skillshare inbox                       # check what's waiting
-skillshare who @username               # see someone's skill list
-skillshare sync                        # publish your skill list
+skillshare inbox                       # check inbox (friend requests + skills)
+skillshare friends                     # list friends
+skillshare friends add @username       # send a friend request
+skillshare friends accept @username    # accept a friend request
+skillshare friends decline @username   # decline a friend request
 ```
+
+## Notifications
+
+Every time you submit a prompt in Claude Code, a background hook silently checks your inbox. If anything new arrives, you get a macOS notification. No polling, no separate process.
 
 ## How it works
 
-Skills are Claude Code slash commands — markdown files in `~/.claude/commands/`. When you send a skill, the file content is delivered to the recipient's inbox. When they install it, it's written to their `~/.claude/commands/` and available immediately as a slash command.
+- Skills are stored as Cloudflare KV entries — no database, no server to manage
+- Auth is a token issued at registration, stored in `~/.claude/skills-exchange/config.json`
+- The friends requirement means skills can only be delivered between people who know each other
 
 ## Self-hosting (optional)
 
-The shared backend handles everything — you don't need to run your own. If you want full control over your data, you can deploy your own Cloudflare Worker:
+The shared backend handles everything by default. To run your own:
 
 ```bash
 cd backend

@@ -10,7 +10,18 @@ const config = require('../config');
 const api = require('../api');
 const notify = require('../notify');
 
-const SEEN_FILE = path.join(os.homedir(), '.claude', 'skills-exchange', '.seen_ids.json');
+const SEEN_FILE  = path.join(os.homedir(), '.claude', 'skills-exchange', '.seen_ids.json');
+const QUEUE_FILE = path.join(os.homedir(), '.claude', 'skills-exchange', 'pending-sends.json');
+
+function readQueue() {
+  try { return JSON.parse(fs.readFileSync(QUEUE_FILE, 'utf8')); } catch { return []; }
+}
+function writeQueue(q) {
+  try {
+    fs.mkdirSync(path.dirname(QUEUE_FILE), { recursive: true });
+    fs.writeFileSync(QUEUE_FILE, JSON.stringify(q, null, 2));
+  } catch {}
+}
 
 function readSeen() {
   try { return new Set(JSON.parse(fs.readFileSync(SEEN_FILE, 'utf8'))); } catch { return new Set(); }
@@ -35,8 +46,6 @@ module.exports = async function check() {
   const unseen = messages.filter(m => !seen.has(m.id));
   writeSeen(new Set(messages.map(m => m.id)));
 
-  if (unseen.length === 0) return;
-
   const skills   = unseen.filter(m => m.type === 'skill' || !m.type);
   const requests = unseen.filter(m => m.type === 'friend_request');
 
@@ -51,7 +60,26 @@ module.exports = async function check() {
   else if (requests.length > 1)
     parts.push(`${requests.length} friend requests waiting`);
 
-  if (parts.length === 0) return;
+  if (parts.length > 0) {
+    notify('🤝 Skills Exchange', parts.join(' · '));
+  }
 
-  notify('⚡ Skills Exchange', parts.join(' · '));
+  // Process pending-send queue — retry any skills queued while not yet friends
+  const queue = readQueue();
+  if (queue.length === 0) return;
+
+  const remaining = [];
+  for (const item of queue) {
+    try {
+      const res = await api.send(item.to, item.skillName, item.content, cfg.token);
+      if (res.status === 200) {
+        notify('🤝 Skills Exchange', `/${item.skillName} delivered to @${item.to}`);
+      } else {
+        remaining.push(item); // still not friends or other error — keep queued
+      }
+    } catch {
+      remaining.push(item);
+    }
+  }
+  writeQueue(remaining);
 };

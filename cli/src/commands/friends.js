@@ -1,6 +1,12 @@
 const config = require('../config');
 const api = require('../api');
 
+async function findRequest(cfg, from) {
+  const res = await api.inbox(cfg.token);
+  const messages = res.body?.messages || [];
+  return messages.find(m => m.type === 'friend_request' && m.from === from);
+}
+
 module.exports = async function friends(args) {
   const cfg = config.requireAuth();
   const [sub] = args;
@@ -16,25 +22,35 @@ module.exports = async function friends(args) {
     if (res.status === 404)        { console.log(`\n@${to} is not on Skills Exchange.`); process.exit(1); }
     if (!res.body?.ok)             { console.log(`\nError: ${res.body?.error || 'failed'}`); process.exit(1); }
     console.log(' done');
-    console.log(`@${to} will see your request in their inbox and widget.`);
+    console.log(`@${to} will see your request in their inbox.`);
     return;
   }
 
-  // skillshare friends accept @username <request_id>
+  // skillshare friends accept @username [request_id]
   if (sub === 'accept') {
     const from = (args[1] || '').replace(/^@/, '');
-    const requestId = args[2];
-    if (!from || !requestId) { console.error('Usage: skillshare friends accept @username <request_id>'); process.exit(1); }
+    if (!from) { console.error('Usage: skillshare friends accept @username'); process.exit(1); }
+    let requestId = args[2];
+    if (!requestId) {
+      const req = await findRequest(cfg, from);
+      if (!req) { console.error(`No pending friend request from @${from}.`); process.exit(1); }
+      requestId = req.id;
+    }
     const res = await api.friendAccept(requestId, from, cfg.token);
     if (!res.body?.ok) { console.log(`Error: ${res.body?.error || 'failed'}`); process.exit(1); }
     console.log(`✓ You and @${from} are now friends. You can send each other skills.`);
     return;
   }
 
-  // skillshare friends decline @username <request_id>
+  // skillshare friends decline @username [request_id]
   if (sub === 'decline') {
-    const requestId = args[2];
-    if (!requestId) { console.error('Usage: skillshare friends decline @username <request_id>'); process.exit(1); }
+    const from = (args[1] || '').replace(/^@/, '');
+    let requestId = args[2];
+    if (!requestId) {
+      const req = await findRequest(cfg, from);
+      if (!req) { console.error(`No pending friend request from @${from}.`); process.exit(1); }
+      requestId = req.id;
+    }
     await api.friendDecline(requestId, cfg.token);
     console.log('Request declined.');
     return;

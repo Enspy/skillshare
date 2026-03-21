@@ -3,7 +3,7 @@
 const root = document.getElementById('root');
 
 function autoResize() {
-  requestAnimationFrame(() => window.api.resize(document.body.scrollHeight));
+  window.api.resize(document.body.scrollHeight);
 }
 
 function timeAgo(iso) {
