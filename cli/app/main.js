@@ -1,8 +1,8 @@
 'use strict';
 
 const { app, ipcMain, nativeImage } = require('electron');
-const { menubar } = require('menubar');
 const path = require('path');
+const { menubar } = require(require.resolve('menubar', { paths: [path.join(__dirname, '..', 'node_modules'), __dirname] }));
 const fs = require('fs');
 const os = require('os');
 const https = require('https');
