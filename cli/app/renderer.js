@@ -82,7 +82,7 @@ function renderMain(state) {
       <span class="row-icon green">⚡</span>
       <div class="row-info">
         <div class="row-name">/${m.skill_name}</div>
-        <div class="row-meta">from @${m.from} · ${timeAgo(m.sent_at)}</div>
+        <div class="row-meta">${m.description ? `${m.description} · ` : ''}from @${m.from} · ${timeAgo(m.sent_at)}</div>
       </div>
       <button class="action-btn btn-indigo" data-id="${m.id}" data-name="${m.skill_name}" data-action="install">Add</button>
       <button class="action-btn btn-red" data-id="${m.id}" data-action="reject" style="margin-left:4px">✕</button>

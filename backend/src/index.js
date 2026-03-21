@@ -180,6 +180,7 @@ export default {
           from,
           skill_name: skillName,
           skill_content: String(body.skill_content || '').slice(0, 65536),
+          description: String(body.description || '').slice(0, 120),
           sent_at: new Date().toISOString(),
         }),
         { expirationTtl: 60 * 60 * 24 * 30 },

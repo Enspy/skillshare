@@ -49,8 +49,8 @@ function request(method, pathname, body, token) {
 
 module.exports = {
   claim: (username) => request('POST', '/claim', { username }),
-  send: (to, skillName, skillContent, token) =>
-    request('POST', '/send', { to, skill_name: skillName, skill_content: skillContent }, token),
+  send: (to, skillName, skillContent, description, token) =>
+    request('POST', '/send', { to, skill_name: skillName, skill_content: skillContent, description }, token),
   inbox: (token, since) =>
     request('GET', `/inbox${since ? `?since=${encodeURIComponent(since)}` : ''}`, null, token),
   deleteMessage: (id, token) => request('DELETE', `/inbox/${id}`, null, token),

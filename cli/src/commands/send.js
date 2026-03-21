@@ -1,11 +1,41 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const https = require('https');
 const config = require('../config');
 const api = require('../api');
 const notify = require('../notify');
 
 const QUEUE_FILE = path.join(os.homedir(), '.claude', 'skills-exchange', 'pending-sends.json');
+
+async function generateDescription(skillName, content) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const body = JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 20,
+      messages: [{ role: 'user', content: `In 3-4 words, describe what this Claude Code skill called "${skillName}" does. Reply with only the short description, no punctuation.\n\n${content.slice(0, 500)}` }],
+    });
+    return await new Promise((resolve) => {
+      const req = https.request(
+        { hostname: 'api.anthropic.com', port: 443, path: '/v1/messages', method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'Content-Length': Buffer.byteLength(body) } },
+        (res) => {
+          let raw = '';
+          res.on('data', c => raw += c);
+          res.on('end', () => {
+            try { resolve(JSON.parse(raw).content?.[0]?.text?.trim() || null); } catch { resolve(null); }
+          });
+        }
+      );
+      req.setTimeout(5000, () => { req.destroy(); resolve(null); });
+      req.on('error', () => resolve(null));
+      req.write(body);
+      req.end();
+    });
+  } catch { return null; }
+}
 
 function readQueue() {
   try { return JSON.parse(fs.readFileSync(QUEUE_FILE, 'utf8')); } catch { return []; }
@@ -50,11 +80,12 @@ module.exports = async function send(args) {
     process.exit(1);
   }
 
+  const description = await generateDescription(skillName, found.content);
   process.stdout.write(`Sending /${skillName} to @${to}...`);
 
   let res;
   try {
-    res = await api.send(to, skillName, found.content, cfg.token);
+    res = await api.send(to, skillName, found.content, description, cfg.token);
   } catch (e) {
     console.log(`\nError: ${e.message}`);
     process.exit(1);
@@ -86,7 +117,7 @@ module.exports = async function send(args) {
     } catch { console.log(' (request failed)'); }
 
     const queue = readQueue();
-    queue.push({ to, skillName, content: found.content, queued_at: new Date().toISOString() });
+    queue.push({ to, skillName, content: found.content, description, queued_at: new Date().toISOString() });
     writeQueue(queue);
     console.log(`  /${skillName} queued — will deliver once @${to} accepts your request.`);
     console.log(`  Tell @${to} to run: skillshare friends accept @${cfg.username}`);

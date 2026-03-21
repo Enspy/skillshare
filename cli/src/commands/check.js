@@ -71,7 +71,7 @@ module.exports = async function check() {
   const remaining = [];
   for (const item of queue) {
     try {
-      const res = await api.send(item.to, item.skillName, item.content, cfg.token);
+      const res = await api.send(item.to, item.skillName, item.content, item.description || null, cfg.token);
       if (res.status === 200) {
         notify('🤝 Skills Exchange', `/${item.skillName} delivered to @${item.to}`);
       } else {
