@@ -1,3 +1,5 @@
+![skillshare](cover.png)
+
 # skillshare-cc
 
 Send and receive Claude Code skills with other users.
