@@ -2,11 +2,8 @@
 
 const root = document.getElementById('root');
 
-// Resize window to fit content after each render
 function autoResize() {
-  requestAnimationFrame(() => {
-    window.api.resize(document.body.scrollHeight);
-  });
+  requestAnimationFrame(() => window.api.resize(document.body.scrollHeight));
 }
 
 function timeAgo(iso) {
@@ -24,13 +21,13 @@ function timeAgo(iso) {
 function renderSetup() {
   root.innerHTML = `
     <div class="header">
-      <div class="header-icon-wrap">⚡</div>
-      <div>
-        <div class="header-title">Skills Exchange</div>
-        <div class="header-sub">Share Claude Code skills with others</div>
+      <div class="header-left">
+        <span class="header-icon">⚡</span>
+        <span class="header-title">Skills Exchange</span>
       </div>
     </div>
-    <div class="setup-card">
+    <div class="divider"></div>
+    <div class="setup-body">
       <div class="setup-title">Choose a username</div>
       <div class="setup-sub">Others will use this to send you skills</div>
       <input class="setup-input" id="u-input" placeholder="@username" autocomplete="off" spellcheck="false" maxlength="32">
@@ -51,9 +48,7 @@ function renderSetup() {
   async function submit() {
     const username = input.value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
     if (username.length < 2) { err.textContent = 'Must be at least 2 characters.'; return; }
-    btn.disabled = true;
-    btn.textContent = 'Registering…';
-    err.textContent = '';
+    btn.disabled = true; btn.textContent = 'Registering…'; err.textContent = '';
     const res = await window.api.register(username);
     if (res.status === 200) {
       renderMain(await window.api.getState());
@@ -70,69 +65,69 @@ function renderSetup() {
 function renderMain(state) {
   const { username, messages = [], requests = [], error } = state;
 
-  const requestsSection = requests.length === 0 ? '' : `
-    <div class="card">
-      <div class="section-label">Friend requests — ${requests.length}</div>
-      ${requests.map((r) => `
-        <div class="skill-row">
-          <div class="skill-row-icon">👤</div>
-          <div class="skill-row-info">
-            <div class="skill-row-name">@${r.from}</div>
-            <div class="skill-row-meta">wants to be friends · ${timeAgo(r.sent_at)}</div>
-          </div>
-          <button class="add-btn" data-id="${r.id}" data-from="${r.from}" data-action="accept">Accept</button>
-          <button class="decline-btn" data-id="${r.id}" data-action="decline">✕</button>
-        </div>
-      `).join('')}
-    </div>
-  `;
-
-  const inboxSection = messages.length === 0 ? `
-    <div class="card">
-      <div class="empty">
-        <div class="empty-text">${error ? '⚠ Could not connect' : 'Inbox empty'}</div>
+  const requestRows = requests.map((r) => `
+    <div class="row">
+      <span class="row-icon indigo">👤</span>
+      <div class="row-info">
+        <div class="row-name">@${r.from}</div>
+        <div class="row-meta">friend request · ${timeAgo(r.sent_at)}</div>
       </div>
+      <button class="action-btn btn-green" data-id="${r.id}" data-from="${r.from}" data-action="accept">Accept</button>
+      <button class="action-btn btn-red" data-id="${r.id}" data-action="decline" style="margin-left:4px">✕</button>
     </div>
+  `).join('');
+
+  const skillRows = messages.map((m) => `
+    <div class="row">
+      <span class="row-icon green">⚡</span>
+      <div class="row-info">
+        <div class="row-name">/${m.skill_name}</div>
+        <div class="row-meta">from @${m.from} · ${timeAgo(m.sent_at)}</div>
+      </div>
+      <button class="action-btn btn-indigo" data-id="${m.id}" data-name="${m.skill_name}" data-action="install">Add</button>
+    </div>
+  `).join('');
+
+  const hasInbox = requests.length > 0 || messages.length > 0;
+
+  const inboxSection = hasInbox ? `
+    ${requests.length > 0 ? `
+      <div class="section-label">Requests</div>
+      ${requestRows}
+      ${messages.length > 0 ? '<div class="divider" style="margin: 4px 0"></div>' : ''}
+    ` : ''}
+    ${messages.length > 0 ? `
+      <div class="section-label">Inbox</div>
+      ${skillRows}
+    ` : ''}
   ` : `
-    <div class="card">
-      <div class="section-label">Inbox — ${messages.length} waiting</div>
-      ${messages.map((m) => `
-        <div class="skill-row">
-          <div class="skill-row-icon">⚡</div>
-          <div class="skill-row-info">
-            <div class="skill-row-name">/${m.skill_name}</div>
-            <div class="skill-row-meta">@${m.from} · ${timeAgo(m.sent_at)}</div>
-          </div>
-          <button class="add-btn" data-id="${m.id}" data-name="${m.skill_name}">Add</button>
-        </div>
-      `).join('')}
+    <div class="empty">
+      <div class="empty-text">${error ? 'Could not connect' : 'Inbox empty'}</div>
     </div>
   `;
 
   root.innerHTML = `
     <div class="header">
-      <div class="header-icon-wrap">⚡</div>
-      <div>
-        <div class="header-title">Skills Exchange</div>
-        <div class="header-sub">@${username}</div>
+      <div class="header-left">
+        <span class="header-icon">⚡</span>
+        <span class="header-title">Skills Exchange</span>
       </div>
+      <span class="header-time">@${username}</span>
     </div>
-    ${requestsSection}
+    <div class="divider"></div>
     ${inboxSection}
-    <div class="tiles">
-      <button class="tile" id="send-tile">
-        <span class="tile-icon">↑</span>
-        <span class="tile-label">Send Skill</span>
-      </button>
-      <button class="tile" id="add-friend-tile">
-        <span class="tile-icon">+</span>
-        <span class="tile-label">Add Friend</span>
-      </button>
+    <div class="divider"></div>
+    <div class="footer">
+      <div style="display:flex;gap:2px">
+        <button class="footer-btn" id="send-btn">↑ Send</button>
+        <button class="footer-btn" id="friend-btn">+ Friend</button>
+      </div>
+      <button class="footer-btn" id="refresh-btn">↺</button>
     </div>
   `;
   autoResize();
 
-  // Accept/decline friend request buttons
+  // Accept friend
   root.querySelectorAll('[data-action="accept"]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       btn.textContent = '…'; btn.disabled = true;
@@ -140,6 +135,8 @@ function renderMain(state) {
       renderMain(await window.api.getState());
     });
   });
+
+  // Decline friend
   root.querySelectorAll('[data-action="decline"]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       btn.disabled = true;
@@ -148,54 +145,54 @@ function renderMain(state) {
     });
   });
 
-  // Install skill buttons
-  root.querySelectorAll('.add-btn[data-name]').forEach((btn) => {
+  // Install skill
+  root.querySelectorAll('[data-action="install"]').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      btn.textContent = '…';
-      btn.disabled = true;
+      btn.textContent = '…'; btn.disabled = true;
       const res = await window.api.installSkill(btn.dataset.id);
       if (res.ok) {
-        btn.textContent = 'Added ✓';
-        btn.classList.add('done');
+        btn.textContent = '✓'; btn.className = 'action-btn btn-done';
       } else {
-        btn.textContent = 'Error';
+        btn.textContent = 'Err';
       }
     });
   });
 
-  // Send tile
-  document.getElementById('send-tile').addEventListener('click', async () => {
-    const skills = await window.api.getLocalSkills();
-    renderSendPicker(skills, username);
+  document.getElementById('send-btn').addEventListener('click', async () => {
+    renderSendPicker(await window.api.getLocalSkills(), username);
   });
 
-  // Add Friend tile
-  document.getElementById('add-friend-tile').addEventListener('click', () => {
+  document.getElementById('friend-btn').addEventListener('click', () => {
     renderAddFriend(username);
+  });
+
+  document.getElementById('refresh-btn').addEventListener('click', async () => {
+    renderMain(await window.api.getState());
   });
 }
 
 function renderSendPicker(skills, username) {
-  const list = skills.length === 0
+  const rows = skills.length === 0
     ? `<div class="empty"><div class="empty-text">No skills installed yet</div></div>`
-    : `<div class="section-label">Your skills</div>` + skills.map((s) => `
-        <div class="skill-row" style="cursor:pointer" data-skill="${s}">
-          <div class="skill-row-icon">⚡</div>
-          <div class="skill-row-info"><div class="skill-row-name">/${s}</div></div>
-          <span style="color:rgba(0,0,0,0.25);font-size:13px;">›</span>
+    : skills.map((s) => `
+        <div class="row" style="cursor:pointer" data-skill="${s}">
+          <span class="row-icon green">⚡</span>
+          <div class="row-info"><div class="row-name">/${s}</div></div>
+          <span style="color:rgba(255,255,255,0.2);font-size:12px">›</span>
         </div>
       `).join('');
 
   root.innerHTML = `
     <div class="header">
-      <div class="header-icon-wrap">⚡</div>
-      <div>
-        <div class="header-title">Send a Skill</div>
-        <div class="header-sub">@${username}</div>
+      <div class="header-left">
+        <span class="header-icon">⚡</span>
+        <span class="header-title">Send a Skill</span>
       </div>
+      <button class="footer-btn" id="back">‹ Back</button>
     </div>
-    <button class="back-btn" id="back">‹ Back</button>
-    <div class="card">${list}</div>
+    <div class="divider"></div>
+    ${skills.length > 0 ? '<div class="section-label">Your skills</div>' : ''}
+    ${rows}
   `;
   autoResize();
 
@@ -211,16 +208,16 @@ function renderSendPicker(skills, username) {
 function renderSendTo(skillName, username) {
   root.innerHTML = `
     <div class="header">
-      <div class="header-icon-wrap">⚡</div>
-      <div>
-        <div class="header-title">Send /${skillName}</div>
-        <div class="header-sub">@${username}</div>
+      <div class="header-left">
+        <span class="header-icon">⚡</span>
+        <span class="header-title">/${skillName}</span>
       </div>
+      <button class="footer-btn" id="back">‹ Back</button>
     </div>
-    <button class="back-btn" id="back">‹ Back</button>
-    <div class="setup-card">
-      <div class="setup-title">Who should receive it?</div>
-      <div class="setup-sub">Enter their username</div>
+    <div class="divider"></div>
+    <div class="setup-body">
+      <div class="setup-title">Send to who?</div>
+      <div class="setup-sub">Must be a friend</div>
       <input class="setup-input" id="to-input" placeholder="@username" autocomplete="off" spellcheck="false">
       <button class="primary-btn" id="send-btn">Send</button>
       <div class="error-msg" id="send-err"></div>
@@ -237,8 +234,7 @@ function renderSendTo(skillName, username) {
   btn.addEventListener('click', submit);
 
   document.getElementById('back').addEventListener('click', async () => {
-    const skills = await window.api.getLocalSkills();
-    renderSendPicker(skills, username);
+    renderSendPicker(await window.api.getLocalSkills(), username);
   });
 
   async function submit() {
@@ -250,7 +246,7 @@ function renderSendTo(skillName, username) {
       btn.textContent = 'Sent ✓';
       setTimeout(async () => renderMain(await window.api.getState()), 1200);
     } else {
-      err.textContent = res.error || 'Failed — is that username registered?';
+      err.textContent = res.error || 'Failed — are you friends?';
       btn.disabled = false; btn.textContent = 'Send';
     }
   }
@@ -259,16 +255,16 @@ function renderSendTo(skillName, username) {
 function renderAddFriend(username) {
   root.innerHTML = `
     <div class="header">
-      <div class="header-icon-wrap">⚡</div>
-      <div>
-        <div class="header-title">Add a Friend</div>
-        <div class="header-sub">@${username}</div>
+      <div class="header-left">
+        <span class="header-icon">⚡</span>
+        <span class="header-title">Add Friend</span>
       </div>
+      <button class="footer-btn" id="back">‹ Back</button>
     </div>
-    <button class="back-btn" id="back">‹ Back</button>
-    <div class="setup-card">
+    <div class="divider"></div>
+    <div class="setup-body">
       <div class="setup-title">Send a friend request</div>
-      <div class="setup-sub">They'll need to accept before you can exchange skills</div>
+      <div class="setup-sub">They must accept before you can exchange skills</div>
       <input class="setup-input" id="friend-input" placeholder="@username" autocomplete="off" spellcheck="false">
       <button class="primary-btn" id="friend-btn">Send request</button>
       <div class="error-msg" id="friend-err"></div>
@@ -294,7 +290,7 @@ function renderAddFriend(username) {
     btn.disabled = true; btn.textContent = 'Sending…'; err.textContent = '';
     const res = await window.api.addFriend(to);
     if (res.already_friends) {
-      err.textContent = `You're already friends with @${to}.`;
+      err.textContent = `Already friends with @${to}.`;
       btn.disabled = false; btn.textContent = 'Send request';
     } else if (res.already_sent) {
       err.textContent = `Request already sent to @${to}.`;

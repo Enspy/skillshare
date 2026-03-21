@@ -9,7 +9,7 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
       background: transparent;
-      padding: 8px;
+      padding: 6px;
       overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
@@ -17,216 +17,189 @@
     }
 
     .container {
-      background: rgba(235, 230, 221, 0.88);
-      border-radius: 18px;
-      padding: 14px;
-      backdrop-filter: blur(60px) saturate(180%);
-      -webkit-backdrop-filter: blur(60px) saturate(180%);
+      background: rgba(24, 24, 32, 0.94);
+      border-radius: 14px;
+      backdrop-filter: blur(40px) saturate(160%);
+      -webkit-backdrop-filter: blur(40px) saturate(160%);
       box-shadow:
-        0 0 0 0.5px rgba(0, 0, 0, 0.12),
-        0 4px 24px rgba(0, 0, 0, 0.18);
+        0 0 0 0.5px rgba(255, 255, 255, 0.10),
+        0 8px 32px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
     }
 
     /* Header */
     .header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-      padding: 0 2px;
+      justify-content: space-between;
+      padding: 12px 16px 10px;
     }
-    .header-icon-wrap {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(145deg, #6e6af0, #9b78ff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(110, 106, 240, 0.4);
+    .header-left { display: flex; align-items: center; gap: 8px; }
+    .header-icon {
+      font-size: 15px;
+      line-height: 1;
     }
     .header-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1a1a1a;
-      letter-spacing: -0.3px;
-    }
-    .header-sub {
-      font-size: 11px;
-      color: rgba(0,0,0,0.45);
-      margin-top: 1px;
-    }
-
-    /* Cards */
-    .card {
-      background: rgba(255, 255, 255, 0.62);
-      border-radius: 14px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    .section-label {
-      font-size: 10.5px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: rgba(0,0,0,0.4);
-      padding: 10px 14px 5px;
-    }
-
-    /* Skill rows (like Wi-Fi / Bluetooth list) */
-    .skill-row {
-      display: flex;
-      align-items: center;
-      padding: 9px 14px;
-      gap: 11px;
-      border-top: 0.5px solid rgba(0,0,0,0.07);
-    }
-    .skill-row:first-of-type { border-top: none; }
-    .skill-row-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
-      background: linear-gradient(145deg, #6e6af0, #9b78ff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      flex-shrink: 0;
-    }
-    .skill-row-info { flex: 1; min-width: 0; }
-    .skill-row-name {
       font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.92);
+      letter-spacing: -0.2px;
+    }
+    .header-time {
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Divider */
+    .divider {
+      height: 0.5px;
+      background: rgba(255,255,255,0.08);
+      margin: 0 12px;
+    }
+
+    /* Section label */
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      padding: 10px 16px 4px;
+    }
+
+    /* Rows */
+    .row {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      gap: 10px;
+      border-top: 0.5px solid rgba(255,255,255,0.05);
+    }
+    .row:first-of-type { border-top: none; }
+
+    .row-icon {
+      font-size: 13px;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+      color: rgba(255,255,255,0.5);
+    }
+    .row-icon.green { color: #34c759; }
+    .row-icon.indigo { color: #7b7aff; }
+
+    .row-info { flex: 1; min-width: 0; }
+    .row-name {
+      font-size: 12.5px;
       font-weight: 500;
-      color: #1a1a1a;
+      color: rgba(255,255,255,0.88);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .skill-row-meta {
-      font-size: 11px;
-      color: rgba(0,0,0,0.4);
+    .row-meta {
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.35);
       margin-top: 1px;
     }
-    .add-btn {
-      background: rgba(0,0,0,0.07);
+
+    /* Action buttons */
+    .action-btn {
       border: none;
-      border-radius: 20px;
-      padding: 4px 11px;
-      font-size: 12px;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 11.5px;
       font-weight: 500;
-      color: #5856d6;
-      cursor: pointer;
-      transition: background 0.12s;
-      flex-shrink: 0;
-      font-family: inherit;
-    }
-    .add-btn:hover { background: rgba(88, 86, 214, 0.14); }
-    .add-btn:active { background: rgba(88, 86, 214, 0.22); }
-    .add-btn.done { color: #34c759; background: rgba(52,199,89,0.1); cursor: default; }
-    .decline-btn {
-      background: rgba(255,59,48,0.09);
-      border: none;
-      border-radius: 20px;
-      padding: 4px 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #ff3b30;
       cursor: pointer;
       flex-shrink: 0;
       font-family: inherit;
-      transition: background 0.12s;
-      margin-left: 4px;
+      transition: opacity 0.1s;
     }
-    .decline-btn:hover { background: rgba(255,59,48,0.18); }
-    .decline-btn:disabled { opacity: 0.4; cursor: default; }
+    .action-btn:hover { opacity: 0.8; }
+    .action-btn:disabled { opacity: 0.35; cursor: default; }
 
-    /* Action tiles (like Stage Manager / Screen Mirroring) */
-    .tiles {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 0;
-    }
-    .tile {
-      background: rgba(255, 255, 255, 0.62);
-      border-radius: 14px;
-      padding: 13px 10px 11px;
-      cursor: pointer;
-      transition: background 0.12s, transform 0.1s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      border: none;
-      font-family: inherit;
-    }
-    .tile:hover { background: rgba(255,255,255,0.82); }
-    .tile:active { transform: scale(0.97); }
-    .tile-icon {
-      font-size: 20px;
-      line-height: 1;
-      color: #1a1a1a;
-    }
-    .tile-label {
-      font-size: 11px;
-      font-weight: 500;
-      color: #1a1a1a;
-      text-align: center;
-      line-height: 1.2;
-    }
+    .btn-green  { background: rgba(52,199,89,0.18);  color: #34c759; }
+    .btn-red    { background: rgba(255,59,48,0.14);   color: #ff453a; }
+    .btn-done   { background: rgba(52,199,89,0.12);   color: #34c759; cursor: default; }
+    .btn-indigo { background: rgba(123,122,255,0.18); color: #7b7aff; }
 
-    /* Empty / error state */
+    /* Empty state */
     .empty {
-      padding: 16px 14px;
+      padding: 18px 16px;
       text-align: center;
     }
-    .empty-text { font-size: 12.5px; color: rgba(0,0,0,0.35); }
+    .empty-text {
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* Footer */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px 10px;
+    }
+    .footer-btn {
+      background: none;
+      border: none;
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      font-family: inherit;
+      padding: 3px 6px;
+      border-radius: 5px;
+      transition: background 0.1s, color 0.1s;
+    }
+    .footer-btn:hover {
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.7);
+    }
+    .footer-btn.active {
+      color: #7b7aff;
+    }
 
     /* Setup / onboarding */
-    .setup-card {
-      background: rgba(255,255,255,0.62);
-      border-radius: 14px;
-      padding: 16px 14px;
-      margin-bottom: 8px;
+    .setup-body {
+      padding: 16px;
     }
     .setup-title {
       font-size: 13px;
       font-weight: 600;
-      color: #1a1a1a;
+      color: rgba(255,255,255,0.88);
       margin-bottom: 3px;
     }
     .setup-sub {
       font-size: 11px;
-      color: rgba(0,0,0,0.4);
-      margin-bottom: 11px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 12px;
     }
     .setup-input {
       width: 100%;
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(0,0,0,0.12);
-      border-radius: 9px;
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid rgba(255,255,255,0.14);
+      border-radius: 8px;
       padding: 7px 10px;
       font-size: 13px;
       font-family: inherit;
-      color: #1a1a1a;
+      color: rgba(255,255,255,0.88);
       outline: none;
       margin-bottom: 8px;
       transition: border-color 0.15s, box-shadow 0.15s;
       user-select: text;
       -webkit-user-select: text;
     }
+    .setup-input::placeholder { color: rgba(255,255,255,0.22); }
     .setup-input:focus {
-      border-color: #5856d6;
-      box-shadow: 0 0 0 3px rgba(88,86,214,0.15);
+      border-color: rgba(123,122,255,0.6);
+      box-shadow: 0 0 0 2.5px rgba(123,122,255,0.18);
     }
     .primary-btn {
       width: 100%;
-      background: #5856d6;
+      background: #5e5ce6;
       border: none;
-      border-radius: 9px;
-      padding: 8px;
+      border-radius: 8px;
+      padding: 7px;
       font-size: 13px;
       font-weight: 600;
       color: white;
@@ -235,29 +208,27 @@
       transition: opacity 0.12s;
     }
     .primary-btn:hover { opacity: 0.88; }
-    .primary-btn:disabled { opacity: 0.45; cursor: default; }
+    .primary-btn:disabled { opacity: 0.35; cursor: default; }
+
     .error-msg {
-      font-size: 11px;
-      color: #ff3b30;
-      margin-top: 7px;
+      font-size: 10.5px;
+      color: #ff453a;
+      margin-top: 6px;
       text-align: center;
     }
 
-    /* Back navigation */
+    /* Back link */
     .back-btn {
       background: none;
       border: none;
-      font-size: 12px;
-      color: #5856d6;
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.35);
       cursor: pointer;
-      padding: 0 2px;
+      padding: 0;
       margin-bottom: 10px;
       font-family: inherit;
-      display: flex;
-      align-items: center;
-      gap: 3px;
     }
-    .back-btn:hover { opacity: 0.7; }
+    .back-btn:hover { color: rgba(255,255,255,0.6); }
   </style>
 </head>
 <body>
