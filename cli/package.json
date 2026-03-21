@@ -1,6 +1,6 @@
 {
   "name": "skillshare-cc",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "description": "Send and receive Claude Code skills with other users",
   "main": "src/index.js",
   "files": ["bin", "src", "swiftbar", "app"],

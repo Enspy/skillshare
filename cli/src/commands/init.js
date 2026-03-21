@@ -97,12 +97,9 @@ module.exports = async function init({ reset, username: presetUsername } = {}) {
 
   notify('🤝 Skills Exchange', `You're @${res.body.username} — ready to send and receive skills`);
   console.log(`\n  You're all set as @${res.body.username}\n`);
-  console.log('  What to do next:\n');
-  console.log('  1. Launch the menu bar widget:');
-  console.log('       skillshare app\n');
-  console.log('  2. Add a friend (they need to be on Skills Exchange too):');
-  console.log('       skillshare friends add @username\n');
-  console.log('  3. Send them one of your skills:');
-  console.log('       skillshare send @username /skillname\n');
-  console.log('  You\'ll get a macOS notification whenever someone sends you a skill.\n');
+  console.log('  Add a friend so you can exchange skills:');
+  console.log('    skillshare friends add @username\n');
+
+  // Auto-launch the widget
+  require('./app')();
 };
