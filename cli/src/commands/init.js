@@ -27,9 +27,6 @@ function installHook() {
 }
 
 module.exports = async function init({ reset, username: presetUsername } = {}) {
-  // Skip when running as a postinstall dep (non-interactive context)
-  if (!reset && !presetUsername && !process.stdin.isTTY) return;
-
   const existing = config.read();
 
   if (existing && !reset) {
