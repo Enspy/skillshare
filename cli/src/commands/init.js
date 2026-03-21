@@ -2,20 +2,10 @@ const readline = require('readline');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { execSync } = require('child_process');
 const config = require('../config');
 const api = require('../api');
 const { installCommands } = require('../install-commands');
 const notify = require('../notify');
-
-function suggestUsername() {
-  try {
-    const name = execSync('git config --global user.name 2>/dev/null', { stdio: ['pipe','pipe','pipe'] })
-      .toString().trim();
-    if (name) return name.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20);
-  } catch {}
-  return (process.env.USER || process.env.USERNAME || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20);
-}
 
 function installHook() {
   const settingsFile = path.join(os.homedir(), '.claude', 'settings.json');
@@ -37,20 +27,21 @@ function installHook() {
 }
 
 module.exports = async function init({ reset, username: presetUsername } = {}) {
+  // Skip when running as a postinstall dep (non-interactive context)
+  if (!reset && !presetUsername && !process.stdin.isTTY) return;
+
   const existing = config.read();
 
   if (existing && !reset) {
-    console.log(`Already initialized as @${existing.username}`);
     installHook();
     installCommands();
-    notify('⚡ Skills Exchange', `You're @${existing.username} — notifications active`);
-    console.log(`Run 'skillshare init --reset' to register a new username.`);
+    notify('🤝 Skills Exchange', `You're @${existing.username} — notifications active`);
     return;
   }
 
   let username = '';
 
-  // Non-interactive mode: username passed directly (e.g. from SwiftBar widget)
+  // Non-interactive mode: username passed directly (e.g. from widget)
   if (presetUsername) {
     username = presetUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
     if (username.length < 2) {
@@ -60,18 +51,13 @@ module.exports = async function init({ reset, username: presetUsername } = {}) {
   } else {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
-    const suggestion = suggestUsername();
 
-    console.log('\n  🤝 Claude Code — Skills Exchange\n');
+    console.log('\n  Skills Exchange — share Claude Code skills with anyone\n');
 
     while (username.length < 2) {
-      const prompt = suggestion
-        ? `  Username [@${suggestion}]: `
-        : `  Choose a username (letters, numbers, underscores): @`;
-      const raw = await ask(prompt);
-      const input = raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
-      username = input.length >= 2 ? input : (suggestion.length >= 2 ? suggestion : '');
-      if (username.length < 2) console.log('  Username must be at least 2 characters.\n');
+      const raw = await ask('  Choose a username: @');
+      username = raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+      if (username.length < 2) console.log('  Must be at least 2 characters.\n');
     }
 
     rl.close();
@@ -112,10 +98,14 @@ module.exports = async function init({ reset, username: presetUsername } = {}) {
   installHook();
   console.log(' done\n');
 
-  notify('⚡ Skills Exchange', `You're @${res.body.username} — ready to send and receive skills`);
-  console.log(`  ✓ You are @${res.body.username} on Skills Exchange`);
-  console.log(`  ✓ Slash commands: ${installed.join(', ')}`);
-  console.log(`  ✓ Inbox notifications active in Claude Code\n`);
-  console.log('  Next: add a friend so you can exchange skills:');
-  console.log('    skillshare friends add @username\n');
+  notify('🤝 Skills Exchange', `You're @${res.body.username} — ready to send and receive skills`);
+  console.log(`\n  You're all set as @${res.body.username}\n`);
+  console.log('  What to do next:\n');
+  console.log('  1. Launch the menu bar widget:');
+  console.log('       skillshare app\n');
+  console.log('  2. Add a friend (they need to be on Skills Exchange too):');
+  console.log('       skillshare friends add @username\n');
+  console.log('  3. Send them one of your skills:');
+  console.log('       skillshare send @username /skillname\n');
+  console.log('  You\'ll get a macOS notification whenever someone sends you a skill.\n');
 };
