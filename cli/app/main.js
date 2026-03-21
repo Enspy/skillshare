@@ -118,6 +118,12 @@ ipcMain.handle('register', async (_, username) => {
   return res;
 });
 
+ipcMain.handle('delete-skill', async (_, msgId) => {
+  const cfg = readConfig();
+  try { await apiRequest(`/inbox/${msgId}`, cfg.token, 'DELETE'); } catch {}
+  return { ok: true };
+});
+
 ipcMain.handle('install-skill', async (_, msgId) => {
   const cfg = readConfig();
   const res = await apiRequest('/inbox', cfg.token);

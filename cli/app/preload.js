@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('api', {
   getState:       ()       => ipcRenderer.invoke('get-state'),
   register:       (u)      => ipcRenderer.invoke('register', u),
   installSkill:   (id)     => ipcRenderer.invoke('install-skill', id),
+  deleteSkill:    (id)     => ipcRenderer.invoke('delete-skill', id),
   getLocalSkills: ()       => ipcRenderer.invoke('get-local-skills'),
   sendSkill:      (data)   => ipcRenderer.invoke('send-skill', data),
   resize:         (h)      => ipcRenderer.invoke('resize', h),

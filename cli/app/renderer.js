@@ -85,6 +85,7 @@ function renderMain(state) {
         <div class="row-meta">from @${m.from} · ${timeAgo(m.sent_at)}</div>
       </div>
       <button class="action-btn btn-indigo" data-id="${m.id}" data-name="${m.skill_name}" data-action="install">Add</button>
+      <button class="action-btn btn-red" data-id="${m.id}" data-action="reject" style="margin-left:4px">✕</button>
     </div>
   `).join('');
 
@@ -142,6 +143,15 @@ function renderMain(state) {
     btn.addEventListener('click', async () => {
       btn.disabled = true;
       await window.api.declineFriend(btn.dataset.id);
+      renderMain(await window.api.getState());
+    });
+  });
+
+  // Reject skill
+  root.querySelectorAll('[data-action="reject"]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      await window.api.deleteSkill(btn.dataset.id);
       renderMain(await window.api.getState());
     });
   });
