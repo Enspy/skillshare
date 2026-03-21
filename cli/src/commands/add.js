@@ -36,13 +36,20 @@ module.exports = async function add(args) {
   const commandsDir = path.join(os.homedir(), '.claude', 'commands');
   fs.mkdirSync(commandsDir, { recursive: true });
 
-  const skillFile = path.join(commandsDir, `${msg.skill_name}.md`);
+  const safeName = msg.skill_name.replace(/[^a-z0-9_-]/g, '').slice(0, 64);
+  if (!safeName) {
+    console.error('Invalid skill name received — aborting install.');
+    process.exit(1);
+  }
+
+  const skillFile = path.join(commandsDir, `${safeName}.md`);
 
   if (fs.existsSync(skillFile)) {
     console.log(`/${msg.skill_name} is already installed. Overwriting with version from @${msg.from}.`);
   }
 
   fs.writeFileSync(skillFile, msg.skill_content);
+  fs.chmodSync(skillFile, 0o644);
 
   // Remove the message from inbox
   try {
@@ -51,7 +58,7 @@ module.exports = async function add(args) {
     // non-fatal — skill is installed even if cleanup fails
   }
 
-  console.log(`⚡ /${msg.skill_name} installed to ~/.claude/commands/${msg.skill_name}.md`);
+  console.log(`⚡ /${safeName} installed to ~/.claude/commands/${safeName}.md`);
   console.log(`   Shared by @${msg.from}`);
   console.log(`   Use it now: /${msg.skill_name}`);
 };

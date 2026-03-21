@@ -21,7 +21,7 @@ function read() {
 
 function write(data) {
   ensureDirs();
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2), { mode: 0o600 });
 }
 
 function requireAuth() {

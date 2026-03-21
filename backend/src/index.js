@@ -41,6 +41,20 @@ function areFriends(userA, userB) {
   return (userA.friends || []).includes(userB.username);
 }
 
+function sanitizeSkillName(raw) {
+  return String(raw).replace(/^\//, '').replace(/[^a-z0-9_-]/g, '').slice(0, 64);
+}
+
+async function checkRateLimit(env, key, max, windowSecs) {
+  const now = Date.now();
+  const data = await env.USERS.get(key, 'json') || { count: 0, reset: now + windowSecs * 1000 };
+  if (now > data.reset) { data.count = 0; data.reset = now + windowSecs * 1000; }
+  if (data.count >= max) return false;
+  data.count++;
+  await env.USERS.put(key, JSON.stringify(data), { expirationTtl: windowSecs });
+  return true;
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
@@ -53,6 +67,10 @@ export default {
 
     // POST /claim
     if (path === '/claim' && method === 'POST') {
+      const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+      if (!await checkRateLimit(env, `ratelimit:claim:${ip}`, 10, 3600)) {
+        return err('too many registrations — try again later', 429);
+      }
       const body = await request.json().catch(() => null);
       if (!body?.username) return err('username required');
       const username = sanitizeUsername(body.username);
@@ -108,7 +126,11 @@ export default {
       if (!username) return err('unauthorized', 401);
       const body = await request.json().catch(() => null);
       if (!body?.request_id || !body?.from) return err('request_id and from required');
-      // Delete the request from inbox
+      // Verify the request exists and actually came from body.from
+      const msg = await env.INBOX.get(`inbox:${username}:${body.request_id}`, 'json');
+      if (!msg || msg.type !== 'friend_request' || msg.from !== body.from) {
+        return err('friend request not found', 404);
+      }
       await env.INBOX.delete(`inbox:${username}:${body.request_id}`);
       // Add each other as friends
       const me = await getUser(env, username);
@@ -135,9 +157,14 @@ export default {
     if (path === '/send' && method === 'POST') {
       const from = await authenticate(request, env);
       if (!from) return err('unauthorized', 401);
+      if (!await checkRateLimit(env, `ratelimit:send:${from}`, 50, 3600)) {
+        return err('too many sends — try again later', 429);
+      }
       const body = await request.json().catch(() => null);
       if (!body?.to || !body?.skill_name) return err('to and skill_name required');
       const to = sanitizeUsername(body.to.replace(/^@/, ''));
+      const skillName = sanitizeSkillName(body.skill_name);
+      if (!skillName) return err('invalid skill_name');
       const recipient = await getUser(env, to);
       if (!recipient) return err(`user @${to} not found`, 404);
       // Enforce friendship
@@ -151,7 +178,7 @@ export default {
           id,
           type: 'skill',
           from,
-          skill_name: String(body.skill_name).replace(/^\//, ''),
+          skill_name: skillName,
           skill_content: String(body.skill_content || '').slice(0, 65536),
           sent_at: new Date().toISOString(),
         }),
