@@ -172,7 +172,7 @@ app.whenReady().then(() => {
         contextIsolation: true,
         nodeIntegration: false,
       },
-      vibrancy: 'fullscreen-ui',
+      vibrancy: 'popover',
       visualEffectState: 'active',
       transparent: true,
       frame: false,
