@@ -92,6 +92,10 @@ ipcMain.handle('add-friend', async (_, to) => {
   return res.body;
 });
 
+ipcMain.handle('quit', () => {
+  app.quit();
+});
+
 ipcMain.handle('register', async (_, username) => {
   const res = await apiRequest('/claim', null, 'POST', { username });
   if (res.status === 200) {

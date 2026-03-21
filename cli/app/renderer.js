@@ -123,6 +123,7 @@ function renderMain(state) {
         <button class="footer-btn" id="friend-btn">+ Friend</button>
       </div>
       <button class="footer-btn" id="refresh-btn">↺</button>
+      <button class="footer-btn" id="quit-btn">Quit</button>
     </div>
   `;
   autoResize();
@@ -168,6 +169,10 @@ function renderMain(state) {
 
   document.getElementById('refresh-btn').addEventListener('click', async () => {
     renderMain(await window.api.getState());
+  });
+
+  document.getElementById('quit-btn').addEventListener('click', () => {
+    window.api.quit();
   });
 }
 

@@ -13,4 +13,5 @@ contextBridge.exposeInMainWorld('api', {
   acceptFriend:   (data)   => ipcRenderer.invoke('accept-friend', data),
   declineFriend:  (id)     => ipcRenderer.invoke('decline-friend', id),
   addFriend:      (to)     => ipcRenderer.invoke('add-friend', to),
+  quit:           ()       => ipcRenderer.invoke('quit'),
 });
