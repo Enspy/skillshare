@@ -22,7 +22,8 @@ function findSkillFile(skillName) {
   const candidates = [
     path.join(os.homedir(), '.claude', 'commands', `${name}.md`),
     path.join(os.homedir(), '.claude', 'commands', `skills-${name}.md`),
-    // also check current project .claude/commands/
+    path.join(os.homedir(), '.claude', 'skills', name, 'SKILL.md'),
+    path.join(os.homedir(), '.claude', 'skills', name, `${name}.md`),
     path.join(process.cwd(), '.claude', 'commands', `${name}.md`),
   ];
   for (const p of candidates) {
